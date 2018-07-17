@@ -234,26 +234,26 @@ void A2CBOutput::WriteHit(G4HCofThisEvent* HitsColl){
             for(Int_t i=0;i<fN_AT;i++){
                 GasHit* hit = (GasHit*)(hc->GetHit(i));
                 fAT_i[i] = id = hit->GetID();
-                fAT_e[i] = hit->GetEdep()/GeV;
+                fAT_e[i] = hit->GetEdep()/CLHEP::GeV;
                 if(id < 6 ){
                     for(Int_t j=0; j<4; j++){
                         ee = fAT_Epmt[j];
                         lc = fAT_LCpmt[j];
-                        ee[i] = hit->GetEpmt(j)/GeV;
+                        ee[i] = hit->GetEpmt(j)/CLHEP::GeV;
                         lc[i] = hit->GetLCpmt(j);
                     }
                 }
                 else{
-                    fAT_Epmt[0][i] = hit->GetEpmt(0)/GeV;
+                    fAT_Epmt[0][i] = hit->GetEpmt(0)/CLHEP::GeV;
                     fAT_LCpmt[0][i] = hit->GetLCpmt(0);
                     for(Int_t j=1; j<4; j++){
                         fAT_Epmt[j][i] = fAT_LCpmt[j][i] = 0.0;
                     }
                 }
-                fAT_t[i] = hit->GetTime()/ns;
-                fAT_x[i] = hit->GetPos().x()/cm;
-                fAT_y[i] = hit->GetPos().y()/cm;
-                fAT_z[i] = hit->GetPos().z()/cm;
+                fAT_t[i] = hit->GetTime()/CLHEP::ns;
+                fAT_x[i] = hit->GetPos().x()/CLHEP::cm;
+                fAT_y[i] = hit->GetPos().y()/CLHEP::cm;
+                fAT_z[i] = hit->GetPos().z()/CLHEP::cm;
             }
         }
     }
