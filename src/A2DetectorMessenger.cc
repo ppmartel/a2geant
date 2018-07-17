@@ -47,6 +47,11 @@ A2DetectorMessenger::A2DetectorMessenger(
   fUseMWPCCmd->SetParameterName("UseMWPC",false);
   fUseMWPCCmd->AvailableForStates(G4State_PreInit,G4State_Init,G4State_Idle);
 
+  fUseAHeTCmd=new G4UIcmdWithAnInteger("/A2/det/useAHeT",this);
+  fUseAHeTCmd->SetGuidance("Construct Active Helium Target");
+  fUseAHeTCmd->SetParameterName("UseAHeT",false);
+  fUseAHeTCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
   fUseTargetCmd=new G4UIcmdWithAString("/A2/det/useTarget",this);
   fUseTargetCmd->SetGuidance("Select the type of target");
   fUseTargetCmd->SetGuidance("Either Cryo or Solid");
@@ -149,6 +154,7 @@ A2DetectorMessenger::~A2DetectorMessenger()
   delete fUseTAPSCmd;
   delete fUseCBCmd;
   delete fUsePIDCmd;
+  delete fUseAHeTCmd;
   delete fUseTargetCmd;
   delete fTargetMatCmd;
   delete fTargetMagneticCoilsCmd;
@@ -189,7 +195,10 @@ void A2DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
 
   if( command == fUseCherenkovCmd )
     { fA2Detector->SetUseCherenkov(fUseCherenkovCmd->GetNewIntValue(newValue));}
-  
+
+  if( command == fUseAHeTCmd )
+    { fA2Detector->SetUseAHeT(fUseAHeTCmd->GetNewIntValue(newValue));}
+
   if( command == fUpdateCmd )
     { fA2Detector->UpdateGeometry(); }
   

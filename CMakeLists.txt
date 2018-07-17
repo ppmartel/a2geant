@@ -44,6 +44,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include ${PLUTO_INCLUDE_PATH})
 # changes in the source file list by the build system!
 add_executable(A2
   src/A2.cc
+  src/A2AHeT.cc
   src/A2CBOutput.cc
   src/A2CBSD.cc
   src/A2CryoTarget.cc
@@ -74,7 +75,11 @@ add_executable(A2
   src/A2VisHit.cc
   src/A2VisSD.cc
   src/A2WCSD.cc
+  src/GasHit.cc
+  src/GasSD.cc
+  src/LightColl.cc
   src/TIDhack.cc
+  include/A2AHeT.hh
   include/A2CBOutput.hh
   include/A2CBSD.hh
   include/A2CryoTarget.hh
@@ -107,6 +112,9 @@ add_executable(A2
   include/A2VisSD.hh
   include/A2WCSD.hh
   include/anyoption.h
+  include/GasHit.hh
+  include/GasSD.hh
+  include/LightColl.hh
   include/LinkDef.h
   include/MCNtuple.h
   include/TIDhack.h

@@ -40,6 +40,17 @@ A2CBOutput::A2CBOutput(){
 		ftofz=new Float_t[fToFTot];
 	}
 
+    //Active Helium Target
+    fNelem = 6;
+    fAT_i=new Int_t[fNelem];
+    fAT_e=new Float_t[fNelem];
+    for(Int_t i=0; i<4; i++) fAT_Epmt[i]=new Float_t[fNelem];
+    for(Int_t i=0; i<4; i++) fAT_LCpmt[i]=new Float_t[fNelem];
+    fAT_t=new Float_t[fNelem];
+    fAT_x=new Float_t[fNelem];
+    fAT_y=new Float_t[fNelem];
+    fAT_z=new Float_t[fNelem];
+
 }
 A2CBOutput::~A2CBOutput(){
 	if(fTree)delete fTree;
@@ -98,6 +109,22 @@ void A2CBOutput::SetBranches(){
     fTree->Branch("tofy",ftofy,"ftofy[fntof]/F",basket);
     fTree->Branch("tofz",ftofz,"ftofz[fntof]/F",basket);
   }
+  fTree->Branch("atN",&fN_AT,"fN_AT/I",basket);
+  fTree->Branch("atI",fAT_i,"fAT_i[fN_AT]/I",basket);
+  fTree->Branch("atE",fAT_e,"fAT_e[fN_AT]/F",basket);
+  fTree->Branch("atE0",fAT_Epmt[0],"fAT_E0[fN_AT]/F",basket);
+  fTree->Branch("atE1",fAT_Epmt[1],"fAT_E1[fN_AT]/F",basket);
+  fTree->Branch("atE2",fAT_Epmt[2],"fAT_E2[fN_AT]/F",basket);
+  fTree->Branch("atE3",fAT_Epmt[3],"fAT_E3[fN_AT]/F",basket);
+  fTree->Branch("atLC0",fAT_LCpmt[0],"fAT_LC0[fN_AT]/F",basket);
+  fTree->Branch("atLC1",fAT_LCpmt[1],"fAT_LC1[fN_AT]/F",basket);
+  fTree->Branch("atLC2",fAT_LCpmt[2],"fAT_LC2[fN_AT]/F",basket);
+  fTree->Branch("atLC3",fAT_LCpmt[3],"fAT_LC3[fN_AT]/F",basket);
+  fTree->Branch("atT",fAT_t,"fAT_t[fN_AT]/F",basket);
+  fTree->Branch("atX",fAT_x,"fAT_x[fN_AT]/F",basket);
+  fTree->Branch("atY",fAT_y,"fAT_y[fN_AT]/F",basket);
+  fTree->Branch("atZ",fAT_z,"fAT_z[fN_AT]/F",basket);
+
   fTree->Branch("mc_evt_id", fPGA->MCEvtIDPtr(),"mc_evt_id/L",basket);
   fTree->Branch("mc_rnd_id", fPGA->MCRndIDPtr(),"mc_evt_id/L",basket);
 
@@ -199,7 +226,37 @@ void A2CBOutput::WriteHit(G4HCofThisEvent* HitsColl){
 				ftofi[i]=hit->GetID();
 			}
 		}
-	}
+        if(hc->GetName()=="GasSDHits"){
+            fN_AT=hc_nhits;
+            Int_t id;
+            Float_t* ee;
+            Float_t* lc;
+            for(Int_t i=0;i<fN_AT;i++){
+                GasHit* hit = (GasHit*)(hc->GetHit(i));
+                fAT_i[i] = id = hit->GetID();
+                fAT_e[i] = hit->GetEdep()/GeV;
+                if(id < 6 ){
+                    for(Int_t j=0; j<4; j++){
+                        ee = fAT_Epmt[j];
+                        lc = fAT_LCpmt[j];
+                        ee[i] = hit->GetEpmt(j)/GeV;
+                        lc[i] = hit->GetLCpmt(j);
+                    }
+                }
+                else{
+                    fAT_Epmt[0][i] = hit->GetEpmt(0)/GeV;
+                    fAT_LCpmt[0][i] = hit->GetLCpmt(0);
+                    for(Int_t j=1; j<4; j++){
+                        fAT_Epmt[j][i] = fAT_LCpmt[j][i] = 0.0;
+                    }
+                }
+                fAT_t[i] = hit->GetTime()/ns;
+                fAT_x[i] = hit->GetPos().x()/cm;
+                fAT_y[i] = hit->GetPos().y()/cm;
+                fAT_z[i] = hit->GetPos().z()/cm;
+            }
+        }
+    }
 
 }
 void A2CBOutput::WriteGenInput(){

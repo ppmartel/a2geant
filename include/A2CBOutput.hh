@@ -5,6 +5,7 @@
 #include "A2PrimaryGeneratorAction.hh"
 #include "A2DetectorConstruction.hh"
 #include "A2Hit.hh"
+#include "GasHit.hh"
 #include "G4HCofThisEvent.hh"
 #include "PParticle.h"
 
@@ -16,6 +17,7 @@ const G4int MAXSIZE_NAI= 720;
 const G4int MAXSIZE_TAPS= 512;
 const G4int MAXSIZE_PID= 24;
 const G4int MAXSIZE_MWPC = 400;
+const G4int MAXSIZE_AT= 18;
 
 class A2CBOutput 
 {
@@ -75,6 +77,18 @@ protected:
   Float_t *ftofx; //x hit position
   Float_t *ftofy; //y hit position
   Float_t *ftofz; //z hit position
+
+  // Active Helium Target
+  Int_t fNelem;            // number AT cells
+  Int_t fN_AT;             // Number of cell hits
+  Int_t *fAT_i;            // hit cell indexes
+  Float_t *fAT_e;          // hit cell energy deposits
+  Float_t *fAT_Epmt[4];    // PMT weighted energy deposits
+  Float_t *fAT_LCpmt[4];   // PMT light collection factor
+  Float_t *fAT_t;          // cell hit time
+  Float_t *fAT_x;          // x hit position
+  Float_t *fAT_y;          // y hit position
+  Float_t *fAT_z;          // z hit position
 
   TLorentzVector** fGenLorentzVec;
   TLorentzVector* fBeamLorentzVec;

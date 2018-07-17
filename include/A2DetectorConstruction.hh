@@ -16,6 +16,8 @@
 #include "A2Target.hh"
 #include "A2DetMWPC.hh"
 #include "A2DetCherenkov.hh"
+#include "A2AHeT.hh"
+#include "GasSD.hh"
 
 class G4Box;
 class G4LogicalVolume;
@@ -47,6 +49,7 @@ class A2DetectorConstruction : public G4VUserDetectorConstruction
   void SetUseCherenkov(G4int use){fUseCherenkov=use;}
 
 
+  void SetUseAHeT(G4int use){fUseAHeT=use;}
   void SetUseTarget(G4String use){fUseTarget=use;}
   void SetTargetMaterial(G4String mat){fTargetMaterial=G4NistManager::Instance()->FindOrBuildMaterial(mat);}
   void SetDetectorSetup(G4String ds){fDetectorSetup=ds;}
@@ -125,6 +128,13 @@ public:
 
   //PID setup
   G4double fPIDZ;
+
+  //Active Helium Target
+  G4int fUseAHeT; //Build the active helium target
+  A2AHeT* fAHeT;
+  GasSD* fGasSD;
+  G4double fVoxelMapExtend;
+  G4String fLEffVoxelFile;
 private:
     
    

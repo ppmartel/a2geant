@@ -45,6 +45,7 @@ A2DetectorConstruction::A2DetectorConstruction(G4String detSet)
   fPID=NULL;
   fMWPC=NULL;
   fTOF=NULL;
+  fAHeT=NULL;
   fWorldSolid=NULL;
   fWorldLogic=NULL;
   fWorldPhysi=NULL;
@@ -54,6 +55,7 @@ A2DetectorConstruction::A2DetectorConstruction(G4String detSet)
   fTarget=NULL;
   fTargetLength=4.8*CLHEP::cm;
   fTargetZ0=0;
+  fUseAHeT=0;
   fUseTarget=G4String("NO");
   //Default taps settings as for 2003
   fTAPSSetupFile="taps.dat";
@@ -63,6 +65,10 @@ A2DetectorConstruction::A2DetectorConstruction(G4String detSet)
 
   //default settings for PID
   fPIDZ=0.;
+
+  fVoxelMapExtend = 0.0;
+  fLEffVoxelFile = "root/VoxMap-2.root";
+
   //has to be done here in case use new material for target
   DefineMaterials();
 
@@ -85,6 +91,7 @@ G4VPhysicalVolume* A2DetectorConstruction::Construct()
   fUseMWPC=0;
   fUseTOF=0;
   fUseCherenkov=0;
+  fUseAHeT=0;
 
   // read the set up file DetectorSetup.mac
   // get the pointer to the User Interface manager 
@@ -138,6 +145,37 @@ G4VPhysicalVolume* A2DetectorConstruction::Construct()
     fTAPS->SetIsInteractive(fIsInteractive);
     fTAPS->Construct(fWorldLogic);
   }
+  if(fUseTOF){
+    G4cout<<"A2DetectorConstruction::Construct() ToF time!"<<G4endl;
+    fTOF=new A2DetTOF();
+    fTOF->ReadParameters(fTOFparFile);
+    fTOF->Construct(fWorldLogic);
+  }
+  if(fUseCherenkov){
+    G4cout<<"A2DetectorConstruction::Construct() Make the Cherenkov"<<G4endl;
+    fCherenkov=new A2DetCherenkov();
+    fCherenkov->SetIsInteractive(fIsInteractive);
+    fCherenkov->Construct(fWorldLogic);
+  }
+  if(fUseAHeT){
+    G4cout<<"A2DetectorConstruction::Construct() Make the active helium target"<<G4endl;
+    fAHeT = new A2AHeT();
+    //fAHeT->SetMakeMylarSections(fATBuildMylarSections);
+    //fAHeT->SetOpticalSimulation(fATOpticalSimulation);
+    //fAHeT->SetScintillationYield(fATScintillationYield);
+    fAHeT->Construct(fWorldLogic);
+    //G4double ScintY = fHeN_mt->GetConstProperty("SCINTILLATIONYIELD");
+    G4double ScintY = 100.0;
+    G4SDManager* SDman = G4SDManager::GetSDMpointer();
+    fGasSD = new GasSD("gasSD", ScintY, 6 );
+    fGasSD->SetLightColl(fLEffVoxelFile, fVoxelMapExtend);
+    SDman->AddNewDetector(fGasSD);
+    //GasL->SetSensitiveDetector( fGasSD );
+    //EndGas0L->SetSensitiveDetector( fGasSD );
+    //EndGas1L->SetSensitiveDetector( fGasSD );
+    fAHeT->GetHeInsideTeflonLogic()->SetSensitiveDetector(fGasSD);
+  }
+  else{
   if(fUsePID){
     G4cout<<"A2DetectorConstruction::Construct() Take the pid "<< fUsePID<<G4endl;
     fPID=new A2DetPID();
@@ -145,7 +183,6 @@ G4VPhysicalVolume* A2DetectorConstruction::Construct()
     else if(fUsePID==2) fPID->Construct2(fWorldLogic,fPIDZ);
     else {G4cerr<<"There are 2 possible PIDS, please set UsePID to be 1 (2003) or 2 (2007)"<<G4endl; exit(1);}
   }
-
   if(fUseMWPC){
     G4cout<<"A2DetectorConstruction::Construct() Make the Wire Chambers"<<G4endl;
     if(fUseMWPC==2)G4cout<<"With the anode wires created"<<G4endl;
@@ -153,18 +190,6 @@ G4VPhysicalVolume* A2DetectorConstruction::Construct()
     if(fUseMWPC==2)fMWPC->UseAnodes(true);
     fMWPC ->Construct(fWorldLogic); 
   }
-  if(fUseTOF){
-    G4cout<<"A2DetectorConstruction::Construct() ToF time!"<<G4endl;
-    fTOF=new A2DetTOF();
-    fTOF->ReadParameters(fTOFparFile);
-    fTOF->Construct(fWorldLogic);
-  }
- if(fUseCherenkov){
-    G4cout<<"A2DetectorConstruction::Construct() Make the Cherenkov"<<G4endl;
-    fCherenkov=new A2DetCherenkov();
-    fCherenkov->SetIsInteractive(fIsInteractive);
-    fCherenkov->Construct(fWorldLogic);
- }
   if(fUseTarget!=G4String("NO")){
     G4cout<<"A2DetectorConstruction::Construct() Fill the "<<fUseTarget<<" with "<<fTargetMaterial->GetName()<<G4endl;
     if(fUseTarget=="Cryo") fTarget=static_cast<A2Target*>(new A2CryoTarget());
@@ -183,6 +208,7 @@ G4VPhysicalVolume* A2DetectorConstruction::Construct()
     if (fTargetZ0)
         G4cout << "A2DetectorConstruction::Construct() Shift the target center by " << fTargetZ0 << " mm" << G4endl;
     fTarget->Construct(fWorldLogic, fTargetZ0);
+  }
   }
   //                                        
   // Visualization attributes
@@ -347,7 +373,6 @@ void A2DetectorConstruction::DefineMaterials()
   G4Material* A2_Epoxy=new G4Material("A2_Epoxy", density=1.2*CLHEP::g/CLHEP::cm3, ncomponents=2);
   A2_Epoxy->AddMaterial(A2_Resin, fractionmass=0.8);
   A2_Epoxy->AddMaterial(A2_13BAC, fractionmass=0.2);
-
 
   /*Now useG4NistManager
  //This function illustrates the possible ways to define materials
